@@ -8,8 +8,9 @@ const asyncHandler = require('express-async-handler')
 // @routes  POST /api/users/
 // @access  Public
 const signupUser = asyncHandler( async (req, res) => {
-  const {name, email, password} = req.body
-
+  const {name, email:rawEmail, password} = req.body
+  const email = rawEmail.toLowerCase()
+  
   if(!name || !email || !password){
     res.status(400)
     throw new Error('Please provide all fields')
@@ -47,7 +48,7 @@ const loginUser = asyncHandler( async (req, res) => {
   const {email, password} = req.body
 
   // Check if user exists
-  const user = await User.findOne({email: email})
+  const user = await User.findOne({email: email.toLowerCase()})
 
   if(user && (await bcrypt.compare(password, user.password))){
     res.json({
@@ -66,8 +67,6 @@ const loginUser = asyncHandler( async (req, res) => {
 // @routes  PUT /api/users/me
 // @access  Public
 const getUser = asyncHandler( async (req, res) => {
-  const {id, email, name} = await User.findById(req.user.id)
-  
   res.status(200).json({id, name, email})
 })
 
